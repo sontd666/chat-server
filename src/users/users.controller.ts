@@ -1,12 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
-import { UsersService } from './users.service';
+import {
+  Controller,
+  Get,
+  Request,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { AuthenticatedRequest } from 'src/interfaces/authenticated-request.interface';
+import { AuthenticationGuard } from 'src/guards/authentication.guard';
+import { ResponseInterceptor } from 'src/interceptors/response.interceptor';
+import { UserDto } from './dtos/user.dto';
 
 @Controller('users')
+@UseGuards(AuthenticationGuard)
 export class UsersController {
-  constructor(private usersService: UsersService) {}
-
   @Get('/me')
-  getMe() {
-    return this.usersService.getMe();
+  @UseInterceptors(new ResponseInterceptor(UserDto))
+  getMe(@Request() req: AuthenticatedRequest) {
+    return req.user;
   }
 }
